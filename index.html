@@ -15,8 +15,60 @@
     .vignette{position:absolute;inset:0;box-shadow:inset 0 120px 220px rgba(0,0,0,0.08), inset 0 -80px 160px rgba(0,0,0,0.06);z-index:1;pointer-events:none}
     .grain{position:absolute;inset:0;background-image:radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 10%);mix-blend-mode:overlay;opacity:0.35;z-index:2}
 
+    /* Image Section */
+    .image-section {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      background: linear-gradient(180deg, rgba(0,103,79,0.0), rgba(0,103,79,0.25));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+    .image-section.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .image-container {
+      width: 300px;
+      height: 300px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border: 2px solid var(--gold1);
+      opacity: 0;
+      transform: scale(0.9);
+      animation: imageIn 1.2s ease-out forwards 0.5s;
+    }
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-caption {
+      font-family: 'Great Vibes', cursive;
+      font-size: 36px;
+      color: var(--gold1);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: captionIn 1s ease-out forwards 1s;
+    }
+    @keyframes imageIn {
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes captionIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Intro */
-    .intro{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:linear-gradient(180deg, rgba(0,103,79,0.0), rgba(0,103,79,0.25))}
+    .intro{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:linear-gradient(180deg, rgba(0,103,79,0.0), rgba(0,103,79,0.25));opacity:0;pointer-events:none;transition:opacity 1s ease}
+    .intro.show{opacity:1;pointer-events:auto}
     .intro .arabic{font-size:84px;color:var(--gold1);text-shadow:0 8px 24px rgba(0,0,0,0.28);opacity:0;transform:translateY(20px);animation:introIn 1s ease-out forwards 0.4s}
     .intro .eng{font-family:'Great Vibes',cursive;font-size:56px;color:var(--gold1);letter-spacing:1px;opacity:0;transform:translateY(20px);animation:introIn 1s ease-out forwards 0.8s}
     .intro .line{width:240px;height:2px;background:linear-gradient(90deg,var(--gold1),var(--gold2));opacity:0;transform:scaleX(0);animation:lineIn 0.9s ease-out forwards 1.2s}
@@ -51,7 +103,14 @@
     .page2.show{opacity:1;pointer-events:auto}
     .card2{max-width:800px;width:92%;padding:40px;text-align:center;border-radius:16px;background:rgba(0,0,0,0.22);border:1px solid rgba(230,194,106,0.2);backdrop-filter:blur(6px);box-shadow:0 20px 60px rgba(0,0,0,0.25)}
 
-    @media (max-width:820px){.title{font-size:36px}.intro .arabic{font-size:42px}.intro .eng{font-size:28px}.card{padding:28px}}
+    @media (max-width:820px){
+      .title{font-size:36px}
+      .intro .arabic{font-size:42px}
+      .intro .eng{font-size:28px}
+      .card{padding:28px}
+      .image-container{width:250px;height:250px}
+      .image-caption{font-size:28px}
+    }
 
     /* Extra glow */
     @keyframes borderGlow {
@@ -112,6 +171,14 @@
     <div class="grain"></div>
 
     <canvas id="introParticles"></canvas>
+
+    <!-- Image Section -->
+    <div class="image-section" id="imageSection">
+      <!-- <div class="image-container"> -->
+        <img src="bismillah.png" alt="Wedding Invitation">
+      </div>
+      <!-- <div class="image-caption">Assālāāmu Alāykum</div> -->
+    </div>
 
     <!-- Intro -->
     <div class="intro" id="intro">
@@ -175,6 +242,33 @@
   </div>
 
   <script>
+    // Get elements
+    const imageSection = document.getElementById('imageSection');
+    const intro = document.getElementById('intro');
+    const card = document.getElementById('card');
+    const page2 = document.getElementById('page2');
+    
+    // Show image section first
+    setTimeout(() => {
+      imageSection.classList.add('show');
+    }, 500);
+    
+    // Transition to intro after 4 seconds
+    setTimeout(() => {
+      imageSection.classList.remove('show');
+      setTimeout(() => {
+        intro.classList.add('show');
+      }, 500);
+    }, 4000);
+    
+    // Transition to main card after 4 more seconds
+    setTimeout(() => {
+      intro.classList.remove('show');
+      setTimeout(() => {
+        card.classList.add('show');
+      }, 500);
+    }, 8000);
+
     // Intro sparkles
     const introCanvas=document.getElementById('introParticles'),ipCtx=introCanvas.getContext('2d');
     let iw=introCanvas.width=innerWidth,ih=introCanvas.height=innerHeight;
@@ -182,48 +276,38 @@
     const sparks=[];for(let i=0;i<90;i++){sparks.push({x:Math.random()*iw,y:Math.random()*ih*0.6+ih*0.2,r:Math.random()*1.6+0.4,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.1)*0.2,alpha:0.06+Math.random()*0.22})}
     function drawSparks(){ipCtx.clearRect(0,0,iw,ih);for(const s of sparks){s.x+=s.vx;s.y+=s.vy;if(s.x<0)s.x=iw;if(s.x>iw)s.x=0;if(s.y<0)s.y=ih;if(s.y>ih)s.y=0;ipCtx.beginPath();ipCtx.fillStyle='rgba(255,245,210,'+s.alpha+')';ipCtx.arc(s.x,s.y,s.r,0,Math.PI*2);ipCtx.fill()}requestAnimationFrame(drawSparks)}drawSparks();
 
-    const intro=document.getElementById('intro');const card=document.getElementById('card');const page2=document.getElementById('page2');
-    setTimeout(()=>{intro.style.transition='opacity 1s ease';intro.style.opacity=0;intro.style.pointerEvents='none';setTimeout(()=>{card.classList.add('show')},400)},8000);
-
     // Dust
     const dCanvas=document.getElementById('dust'),dCtx=dCanvas.getContext('2d');let W=dCanvas.width=innerWidth,H=dCanvas.height=innerHeight;
     window.addEventListener('resize',()=>{W=dCanvas.width=innerWidth;H=dCanvas.height=innerHeight});
     const dust=[];for(let i=0;i<140;i++){dust.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+0.6,vx:(Math.random()-0.5)*0.3,vy:-0.03-Math.random()*0.25,alpha:0.06+Math.random()*0.2})}
     function animateDust(){dCtx.clearRect(0,0,W,H);for(const p of dust){p.x+=p.vx;p.y+=p.vy;if(p.y<-20)p.y=H+20;dCtx.beginPath();dCtx.fillStyle='rgba(255,245,210,'+p.alpha+')';dCtx.arc(p.x,p.y,p.r,0,Math.PI*2);dCtx.fill()}requestAnimationFrame(animateDust)}animateDust();
 
-    // const bg=document.getElementById('bgAudio');bg.volume=0.65;bg.play().catch(()=>{});
-      // document.addEventListener("click", function () {
-      //   const audio = document.getElementById("bgAudio");
-      //   audio.play();
-      // }, { once: true });
+    // Audio handling
     const audio = document.getElementById("bgAudio");
-  audio.volume = 0.65;
+    audio.volume = 0.65;
 
-  // Try to play muted immediately
-  audio.play().catch(()=>{}); // ignore if blocked
+    // Try to play muted immediately
+    audio.play().catch(()=>{}); // ignore if blocked
 
-  // Once the page has focus, unmute and play
-  window.addEventListener('load', () => {
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        // Autoplay started
-        audio.muted = false; // unmute as soon as allowed
-      }).catch(() => {
-        // If blocked, wait for first user gesture
-        document.addEventListener("click", function () {
-          audio.muted = false;
-          audio.play();
-        }, { once: true });
-      });
-    }
-  });
+    // Once the page has focus, unmute and play
+    window.addEventListener('load', () => {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          // Autoplay started
+          audio.muted = false; // unmute as soon as allowed
+        }).catch(() => {
+          // If blocked, wait for first user gesture
+          document.addEventListener("click", function () {
+            audio.muted = false;
+            audio.play();
+          }, { once: true });
+        });
+      }
+    });
     
     // Show page2 after 16s
     setTimeout(()=>{card.style.transition='opacity 1s ease';card.style.opacity=0;setTimeout(()=>{page2.classList.add('show')},1000)},16000);
   </script>
 </body>
 </html>
-
-
-
