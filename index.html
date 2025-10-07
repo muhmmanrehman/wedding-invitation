@@ -166,7 +166,10 @@
 
     <canvas id="dust"></canvas>
 
-    <audio id="bgAudio" loop preload="auto" autoplay>
+    <!-- <audio id="bgAudio" loop preload="auto" autoplay>
+      <source src="guli-mata.mp3" type="audio/mpeg">
+    </audio> -->
+    <audio id="bgAudio" loop preload="auto" muted>
       <source src="guli-mata.mp3" type="audio/mpeg">
     </audio>
   </div>
@@ -189,15 +192,38 @@
     function animateDust(){dCtx.clearRect(0,0,W,H);for(const p of dust){p.x+=p.vx;p.y+=p.vy;if(p.y<-20)p.y=H+20;dCtx.beginPath();dCtx.fillStyle='rgba(255,245,210,'+p.alpha+')';dCtx.arc(p.x,p.y,p.r,0,Math.PI*2);dCtx.fill()}requestAnimationFrame(animateDust)}animateDust();
 
     // const bg=document.getElementById('bgAudio');bg.volume=0.65;bg.play().catch(()=>{});
-      document.addEventListener("click", function () {
-        const audio = document.getElementById("bgAudio");
-        audio.play();
-      }, { once: true });
+      // document.addEventListener("click", function () {
+      //   const audio = document.getElementById("bgAudio");
+      //   audio.play();
+      // }, { once: true });
+    const audio = document.getElementById("bgAudio");
+  audio.volume = 0.65;
+
+  // Try to play muted immediately
+  audio.play().catch(()=>{}); // ignore if blocked
+
+  // Once the page has focus, unmute and play
+  window.addEventListener('load', () => {
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Autoplay started
+        audio.muted = false; // unmute as soon as allowed
+      }).catch(() => {
+        // If blocked, wait for first user gesture
+        document.addEventListener("click", function () {
+          audio.muted = false;
+          audio.play();
+        }, { once: true });
+      });
+    }
+  });
     
     // Show page2 after 16s
     setTimeout(()=>{card.style.transition='opacity 1s ease';card.style.opacity=0;setTimeout(()=>{page2.classList.add('show')},1000)},16000);
   </script>
 </body>
 </html>
+
 
 
